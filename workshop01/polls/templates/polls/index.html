@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: beige;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .quote-container {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        blockquote {
+            font-size: 1.5em;
+            font-style: italic;
+            margin: 0 auto;
+            max-width: 60%;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+        }
+
+        img {
+            width: 150px;
+            height: auto;
+        }
+
+        .attribution {
+            font-size: 0.8em;
+            color: #555;
+        }
+
+        .repo-link {
+            padding: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    {% load static %}
+    <img src="{% static 'polls/sushi.png' %}" alt="sushi">
+
+    <div class="quote-container">
+        {% if quote %}
+            <h1>Quote of the Moment</h1>
+            <blockquote>
+                "{{ quote }}"
+            </blockquote>
+        {% else %}
+            <p>No quotes available.</p>
+        {% endif %}
+    </div>
+
+    <div class="repo-link">
+        <p>Repository <a href="https://github.com/blossomt/csda-app">https://github.com/blossomt/csda-app</a></p>
+    </div>
+
+    <p class="attribution">
+        Sushi icons created by nawicon - Flaticon
+    </p>
+
+
+</body>
+</html>
