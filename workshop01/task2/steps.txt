@@ -1,0 +1,10 @@
+docker network create -d bridge mynet
+docker volume create mydb
+
+docker run -d --network=mynet \
+    --mount type=volume,src=mydb,dst=/var/lib/mysql \
+    --name nwdb stackupiss/northwind-db:v1
+
+docker run -d -p 8080:3000 --network=mynet \
+    -e DB_HOST=nwdb -e DB_USER=root -e DB_PASSWORD=changeit \
+    --name nwapp stackupiss/northwind-app:v1
