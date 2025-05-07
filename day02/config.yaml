@@ -1,0 +1,19 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dov-config
+  namespace: myns
+data:
+  instance_name: 'hello, dov'
+
+# --- indicates new file
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dov-secret
+  namespace: myns
+type: Opaque
+data:
+  INSTANCE_HASH: YXNrZGpoZmFza2xkYXNkZmpoYXNraGRmbGthc2g=
