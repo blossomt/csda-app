@@ -1,0 +1,63 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bgg-config
+  namespace: myns
+data:
+  BGG_DB_USER: root
+  # can create config file from text directly
+  mysql.cnf: |
+    mysql_user: user
+    mysql_password: password
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: bgg-secret
+  namespace: myns
+type: Opaque
+data:
+  BGG_DB_PASSWORD: Y2hhbmdlaXQ=
+
+--- 
+apiVersion: v1 
+kind: Pod 
+metadata:
+  name: fakeapi-po 
+  namespace: myns
+  labels:
+    app: fakeapi 
+spec:
+  volumes:
+    - name: data-volume
+      hostPath:
+        path: /opt/tmp
+        type: DirectoryOrCreate
+    - name: emptydir-volume
+      emptyDir: {}
+    - name: secret-vol
+      secret:
+        secretName: bgg-secret
+    - name: config-vol
+      configMap:
+        name: bgg-config
+  containers:
+  - name: fakeapi-containers 
+    image: chukmunnlee/fake-api:v1
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+      - name: data-volume
+        mountPath: /tmp
+      - name: emptydir-volume
+        mountPath: /pics
+      - name: secret-vol
+        mountPath: /opt/secrets
+        readOnly: true
+      - name: config-vol
+        mountPath: /opt/config
+    ports:
+    - name: fakeapi-port 
+      containerPort: 3000
+    resources: {}
