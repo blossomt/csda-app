@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: db-pvc
+  namespace: myns
+spec:
+  accessModes:
+  - ReadWriteOnce
+  # if access mode not compatible with storage class, will have error in describe
+  # - ReadOnlyMany
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: do-block-storage
