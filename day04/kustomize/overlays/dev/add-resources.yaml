@@ -1,0 +1,24 @@
+
+- op: "add"
+  path: /spec/template/spec/containers/0/resources
+  value: 
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 256Mi
+      cpu: 100m
+
+# - op: "add"
+#   path: /spec/template/spec/containers/0/resources
+#   value: |
+#     { 
+#       "requests": {
+#         "cpu": "100m",
+#         "memory": "256Mi" 
+#       },
+#       "limits": {
+#         "cpu": "100m",
+#         "memory": "256Mi" 
+#       }
+#     }

@@ -1,0 +1,136 @@
+---
+apiVersion: apps/v1 
+kind: StatefulSet 
+metadata: 
+  name: minio-sts
+  namespace: minio 
+spec: 
+  serviceName: minio-hsvc
+  replicas: 3
+  selector:
+    matchLabels:
+      app: minio
+  volumeClaimTemplates:
+  - metadata:
+      name: data-vol
+    spec:
+      storageClassName: do-block-storage 
+      accessModes: 
+      - ReadWriteOncePod
+      resources:
+        requests:
+          storage: 1Gi
+  template: 
+    metadata:
+      name: minio-po
+      labels:
+        app: minio 
+    spec:
+      securityContext:
+        fsGroup: 1001
+      containers:
+      - name: minio-container
+        image: bitnami/minio:2025.4.22
+        imagePullPolicy: IfNotPresent
+        envFrom:
+        - configMapRef:
+            name: minio-cm
+        - secretRef:
+            name: minio-secret
+        ports:
+        - name: server-port 
+          containerPort: 9000
+        - name: console-port
+          containerPort: 9090
+        resources:
+          requests:
+            memory: 500Mi
+            cpu: 200m
+          limits:
+            memory: 500Mi
+            cpu: 200m
+        volumeMounts:
+        - name: data-vol
+          mountPath: /data
+        readinessProbe:
+          httpGet:
+            path: /minio/health/ready
+            port: server-port
+          timeoutSeconds: 5
+          failureThreshold: 1
+        livenessProbe:
+          httpGet:
+            path: /minio/health/live
+            port: server-port
+          timeoutSeconds: 5
+          failureThreshold: 3
+          successThreshold: 1
+
+# headless service for inter cluster communication
+--- 
+apiVersion: v1 
+kind: Service 
+metadata: 
+  name: minio-hsvc
+  namespace: minio 
+spec: 
+  clusterIP: None
+  selector: 
+    app: minio 
+  ports:
+  - name: server-port 
+    port: 9000
+  - name: console-port 
+    port: 9090
+
+# headful service - single point for client to access distributed application
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-svc
+  namespace: minio
+spec:
+  type: ClusterIP
+  selector:
+    app: minio
+  ports:
+  - name: server-port 
+    port: 9000
+    targetPort: server-port
+  - name: console-port 
+    port: 9090
+    targetPort: console-port
+
+--- 
+apiVersion: networking.k8s.io/v1 
+kind: Ingress 
+metadata: 
+  name: minio-ing 
+  namespace: minio 
+  annotations:
+    nginx.ingress.kubernetes.io/limit-rps: "10"
+    nginx.ingress.kubernetes.io/limit-rpm: "300"
+spec: 
+  ingressClassName: nginx 
+  rules:
+  - host: data-137.184.249.123.nip.io 
+    http: 
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service: 
+            name: minio-svc 
+            port:
+              name: server-port
+  - host: console-137.184.249.123.nip.io 
+    http: 
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service: 
+            name: minio-svc 
+            port:
+              name: console-port
